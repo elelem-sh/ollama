@@ -6,7 +6,7 @@ module Elelem
       def initialize(
         model:,
         host: "localhost:11434",
-        think: "medium",
+        think: false,
         keep_alive: "5m",
         options: {},
         params: {},
@@ -104,7 +104,7 @@ module Elelem
       def build_request_body(messages, tools)
         {
           model: @model,
-          messages:,
+          messages: normalize(messages),
           stream: true,
           tools: presence(tools),
           think: @think,
@@ -115,6 +115,36 @@ module Elelem
 
       def presence(value)
         value unless value.nil? || value.empty?
+      end
+
+      def normalize(messages)
+        pending = []
+
+        messages.map do |message|
+          case message[:role]
+          when "assistant" then normalize_calls(message, pending)
+          when "tool" then normalize_result(message, pending)
+          else message
+          end
+        end
+      end
+
+      def normalize_calls(message, pending)
+        calls = message[:tool_calls]
+        return message unless calls
+
+        pending.clear
+        message.merge(tool_calls: calls.map do |call|
+          pending << call[:name]
+          { function: { name: call[:name], arguments: call[:arguments] } }
+        end)
+      end
+
+      def normalize_result(message, pending)
+        name = pending.shift
+        return message unless name
+
+        message.except(:tool_call_id).merge(tool_name: name)
       end
 
       def handle_event(event, tool_calls, &block)
