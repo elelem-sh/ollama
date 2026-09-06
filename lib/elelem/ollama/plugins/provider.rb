@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
-require "elelem"
-require_relative "../ollama"
+require "elelem/plugins"
+require_relative "../../ollama"
 
 Elelem::Providers.register(:ollama) do
   Elelem::Ollama::Client.new(
