@@ -10,16 +10,19 @@ Gem::Specification.new do |spec|
 
   spec.summary = "An Ollama provider plugin for elelem."
   spec.description = "An Ollama provider plugin for elelem."
-  spec.homepage = "https://src.mokhan.ca/xlgmokha/elelem"
+  spec.homepage = "https://src.mokhan.ca/elelem/ollama"
   spec.license = "MIT"
   spec.required_ruby_version = ">= 4.0.0"
-  spec.required_rubygems_version = ">= 4.0.0"
   spec.metadata["allowed_push_host"] = "https://rubygems.org"
   spec.metadata["homepage_uri"] = spec.homepage
-  spec.metadata["source_code_uri"] = "https://git.mokhan.ca/xlgmokha/elelem.git"
+  spec.metadata["source_code_uri"] = spec.homepage
 
-  spec.files = ["LICENSE.txt", "lib/elelem/ollama.rb", "exe/elelem-ollama"] +
-    Dir["lib/elelem/ollama/**/*.{rb}"]
+  gemspec = File.basename(__FILE__)
+  spec.files = IO.popen(%w[git ls-files -z], chdir: __dir__, err: IO::NULL) do |ls|
+    ls.readlines("\x0", chomp: true).reject do |f|
+      (f == gemspec) || f.start_with?(*%w[bin/ Gemfile .gitignore])
+    end
+  end
   spec.bindir = "exe"
   spec.executables = ["elelem-ollama"]
   spec.require_paths = ["lib"]
