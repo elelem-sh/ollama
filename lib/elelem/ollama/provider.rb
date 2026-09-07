@@ -2,7 +2,7 @@
 
 module Elelem
   module Ollama
-    class Client
+    class Provider
       def initialize(
         model:,
         host: "localhost:11434",

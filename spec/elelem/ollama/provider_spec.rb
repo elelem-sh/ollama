@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
-RSpec.describe Elelem::Ollama::Client do
-  subject(:client) { described_class.new(model: "gpt-oss:latest", http:, **params) }
+RSpec.describe Elelem::Ollama::Provider do
+  subject(:provider) { described_class.new(model: "gpt-oss:latest", http:, **params) }
 
   let(:params) { {} }
   let(:messages) { [{ role: "user", content: "hi" }] }
@@ -30,7 +30,7 @@ RSpec.describe Elelem::Ollama::Client do
 
   describe "#fetch" do
     it "sends only model, messages and stream by default" do
-      client.fetch(messages) { }
+      provider.fetch(messages) { }
 
       expect(body).to eq(model: "gpt-oss:latest", messages:, stream: true)
     end
@@ -38,7 +38,7 @@ RSpec.describe Elelem::Ollama::Client do
     it "sends tools when present" do
       tools = [{ type: "function", function: { name: "read" } }]
 
-      client.fetch(messages, tools) { }
+      provider.fetch(messages, tools) { }
 
       expect(body[:tools]).to eq(tools)
     end
@@ -47,7 +47,7 @@ RSpec.describe Elelem::Ollama::Client do
       let(:params) { { think: "high", keep_alive: "30m", options: { num_ctx: 32_768 } } }
 
       it "sends them in the request body" do
-        client.fetch(messages) { }
+        provider.fetch(messages) { }
 
         expect(body).to include(think: "high", keep_alive: "30m", options: { num_ctx: 32_768 })
       end
@@ -57,7 +57,7 @@ RSpec.describe Elelem::Ollama::Client do
       let(:params) { { options: {} } }
 
       it "omits options" do
-        client.fetch(messages) { }
+        provider.fetch(messages) { }
 
         expect(body).not_to have_key(:options)
       end
@@ -67,7 +67,7 @@ RSpec.describe Elelem::Ollama::Client do
       let(:params) { { params: { format: "json", truncate: false, top_logprobs: 3 } } }
 
       it "merges them into the request body" do
-        client.fetch(messages) { }
+        provider.fetch(messages) { }
 
         expect(body).to include(format: "json", truncate: false, top_logprobs: 3)
       end
@@ -77,7 +77,7 @@ RSpec.describe Elelem::Ollama::Client do
       let(:params) { { think: "low", params: { think: "high" } } }
 
       it "prefers the passthrough value" do
-        client.fetch(messages) { }
+        provider.fetch(messages) { }
 
         expect(body[:think]).to eq("high")
       end

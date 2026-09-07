@@ -6,11 +6,11 @@ require "net/http"
 require "uri"
 
 require_relative "ollama/version"
-require_relative "ollama/client"
+require_relative "ollama/provider"
 
 Elelem.configure do |config|
   config.provider(:ollama) do
-    Elelem::Ollama::Client.new(
+    Elelem::Ollama::Provider.new(
       model: ENV.fetch("OLLAMA_MODEL", "gpt-oss:latest"),
       host: ENV.fetch("OLLAMA_HOST", "localhost:11434"),
       think: ENV["OLLAMA_THINK"],
