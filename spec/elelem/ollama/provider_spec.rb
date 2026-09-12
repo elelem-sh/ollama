@@ -8,8 +8,8 @@ RSpec.describe Elelem::Ollama::Provider do
   let(:body) { http.body }
 
   let(:response) do
-    ::Net::HTTPOK.new("1.1", "200", "OK").tap do |it|
-      allow(it).to receive(:read_body).and_yield(%({"done":true,"message":{}}\n))
+    Net::HTTPOK.new("1.1", "200", "OK").tap do |res|
+      allow(res).to receive(:read_body).and_yield(%({"done":true,"message":{}}\n))
     end
   end
 
@@ -30,7 +30,7 @@ RSpec.describe Elelem::Ollama::Provider do
 
   describe "#fetch" do
     it "sends only model, messages and stream by default" do
-      provider.fetch(messages) { }
+      provider.fetch(messages, nil)
 
       expect(body).to eq(model: "gpt-oss:latest", messages:, stream: true)
     end
@@ -38,7 +38,7 @@ RSpec.describe Elelem::Ollama::Provider do
     it "sends tools when present" do
       tools = [{ type: "function", function: { name: "read" } }]
 
-      provider.fetch(messages, tools) { }
+      provider.fetch(messages, tools) {}
 
       expect(body[:tools]).to eq(tools)
     end
@@ -47,7 +47,7 @@ RSpec.describe Elelem::Ollama::Provider do
       let(:params) { { think: "high", keep_alive: "30m", options: { num_ctx: 32_768 } } }
 
       it "sends them in the request body" do
-        provider.fetch(messages) { }
+        provider.fetch(messages, nil)
 
         expect(body).to include(think: "high", keep_alive: "30m", options: { num_ctx: 32_768 })
       end
@@ -57,7 +57,7 @@ RSpec.describe Elelem::Ollama::Provider do
       let(:params) { { options: {} } }
 
       it "omits options" do
-        provider.fetch(messages) { }
+        provider.fetch(messages, nil)
 
         expect(body).not_to have_key(:options)
       end
@@ -67,7 +67,7 @@ RSpec.describe Elelem::Ollama::Provider do
       let(:params) { { params: { format: "json", truncate: false, top_logprobs: 3 } } }
 
       it "merges them into the request body" do
-        provider.fetch(messages) { }
+        provider.fetch(messages, nil)
 
         expect(body).to include(format: "json", truncate: false, top_logprobs: 3)
       end
@@ -77,7 +77,7 @@ RSpec.describe Elelem::Ollama::Provider do
       let(:params) { { think: "low", params: { think: "high" } } }
 
       it "prefers the passthrough value" do
-        provider.fetch(messages) { }
+        provider.fetch(messages, nil)
 
         expect(body[:think]).to eq("high")
       end

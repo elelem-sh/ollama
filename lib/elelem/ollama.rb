@@ -13,8 +13,8 @@ Elelem.configure do |config|
     Elelem::Ollama::Provider.new(
       model: ENV.fetch("OLLAMA_MODEL", "gpt-oss:latest"),
       host: ENV.fetch("OLLAMA_HOST", "localhost:11434"),
-      think: ENV["OLLAMA_THINK"],
-      keep_alive: ENV["OLLAMA_KEEP_ALIVE"]
+      think: ENV.fetch("OLLAMA_THINK", nil),
+      keep_alive: ENV.fetch("OLLAMA_KEEP_ALIVE", nil)
     )
   end
 end

@@ -25,12 +25,12 @@ module Elelem
         @http = http
       end
 
-      def fetch(messages, tools = [], &block)
+      def fetch(messages, tools = [], &)
         tool_calls = []
         body = build_request_body(messages, tools)
 
         stream(body) do |event|
-          handle_event(event, tool_calls, &block)
+          handle_event(event, tool_calls, &)
         end
 
         tool_calls
@@ -97,18 +97,18 @@ module Elelem
           block.call(type: "thinking", text: message["thinking"]) if message["thinking"]
         end
 
-        if message["tool_calls"]
-          parsed = parse_tool_calls(message["tool_calls"])
-          parsed.each { |tc| block.call(tc.merge(type: "doing")) }
-          tool_calls.concat(parsed)
-        end
+        return unless message["tool_calls"]
+
+        parsed = parse_tool_calls(message["tool_calls"])
+        parsed.each { |tc| block.call(tc.merge(type: "doing")) }
+        tool_calls.concat(parsed)
       end
 
-      def stream(body)
+      def stream(body, &)
         http.post(@uri, body: body) do |response|
           raise "HTTP #{response.code}: #{response.body}" unless response.is_a?(Net::HTTPSuccess)
 
-          read_ndjson_stream(response) { |event| yield event }
+          read_ndjson_stream(response, &)
         end
       end
 
@@ -147,7 +147,7 @@ module Elelem
           @open_timeout = open_timeout
         end
 
-        def post(uri, body:)
+        def post(uri, body:, &)
           request = Net::HTTP::Post.new(uri)
           request["content-type"] = "application/json"
           request.body = JSON.generate(body)
@@ -158,7 +158,7 @@ module Elelem
           http.open_timeout = @open_timeout
 
           http.start do |conn|
-            conn.request(request) { |response| yield response }
+            conn.request(request, &)
           end
         end
       end
