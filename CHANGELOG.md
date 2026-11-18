@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.3.1](https://github.com/elelem-sh/ollama/compare/v0.3.0...v0.3.1) (2026-11-18)
+
+
+### Bug Fixes
+
+* **deps:** accept the json that Ruby 4.0 ships ([d26eaff](https://github.com/elelem-sh/ollama/commit/d26eaffcebc8bf725052ff6b087fa155116279e4))
+
 ## [0.3.0](https://github.com/elelem-sh/ollama/compare/v0.2.1...v0.3.0) (2026-11-16)
 
 
