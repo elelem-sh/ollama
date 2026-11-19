@@ -90,6 +90,7 @@ module Elelem
       end
 
       def handle_event(event, tool_calls, &block)
+        stopped(event["done_reason"])
         message = event["message"] || {}
 
         unless event["done"]
@@ -102,6 +103,10 @@ module Elelem
         parsed = parse_tool_calls(message["tool_calls"])
         parsed.each { |tc| block.call(tc.merge(type: "doing")) }
         tool_calls.concat(parsed)
+      end
+
+      def stopped(reason)
+        raise "the reply hit the output limit (num_predict) before it ended" if reason == "length"
       end
 
       def stream(body)

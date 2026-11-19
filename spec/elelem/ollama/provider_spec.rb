@@ -45,6 +45,12 @@ RSpec.describe Elelem::Ollama::Provider do
       expect(seen).to eq([{ type: "saying", text: "hi" }])
     end
 
+    it "says when the reply hit the output limit" do
+      allow(response).to receive(:read_body).and_yield(%({"done":true,"done_reason":"length","message":{}}\n))
+
+      expect { provider.fetch(messages, nil) {} }.to raise_error(/output limit \(num_predict\)/)
+    end
+
     it "sends tools when present" do
       tools = [{ type: "function", function: { name: "read" } }]
 
