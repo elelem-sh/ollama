@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.4.0](https://github.com/elelem-sh/ollama/compare/v0.3.1...v0.4.0) (2026-11-19)
+
+
+### Features
+
+* stream over a kept-alive connection that retries busy servers ([f6c149a](https://github.com/elelem-sh/ollama/commit/f6c149a52b2cd3b8230c2e4589d484cafc1e6a8e))
+
+
+### Bug Fixes
+
+* say when a reply hits the output limit ([22002d4](https://github.com/elelem-sh/ollama/commit/22002d49fa756ed34b8f65e24335fc5eaaaac244))
+
 ## [0.3.1](https://github.com/elelem-sh/ollama/compare/v0.3.0...v0.3.1) (2026-11-18)
 
 
