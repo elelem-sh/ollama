@@ -35,6 +35,16 @@ RSpec.describe Elelem::Ollama::Provider do
       expect(body).to eq(model: "gpt-oss:latest", messages:, stream: true)
     end
 
+    it "reads lines split across chunks and ended by CRLF" do
+      allow(response).to receive(:read_body)
+        .and_yield(%({"message":{"content":"h)).and_yield(%(i"}}\r\n{"done":true,"message":{}}))
+      seen = []
+
+      provider.fetch(messages, nil) { |event| seen << event }
+
+      expect(seen).to eq([{ type: "saying", text: "hi" }])
+    end
+
     it "sends tools when present" do
       tools = [{ type: "function", function: { name: "read" } }]
 

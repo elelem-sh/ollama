@@ -104,31 +104,14 @@ module Elelem
         tool_calls.concat(parsed)
       end
 
-      def stream(body, &)
-        http.post(@uri, body: body) do |response|
-          raise "HTTP #{response.code}: #{response.body}" unless response.is_a?(Net::HTTPSuccess)
-
-          read_ndjson_stream(response, &)
+      def stream(body)
+        http.post(@uri, body:) do |response|
+          Elelem::HTTP.lines(response) { |line| yield JSON.parse(line) }
         end
       end
 
       def http
-        @http ||= HttpAdapter.new(read_timeout: @read_timeout, open_timeout: @open_timeout)
-      end
-
-      def read_ndjson_stream(response)
-        buffer = String.new
-
-        response.read_body do |chunk|
-          buffer << chunk
-
-          while (index = buffer.index("\n"))
-            line = buffer.slice!(0, index + 1)
-            next if line.strip.empty?
-
-            yield JSON.parse(line)
-          end
-        end
+        @http ||= Elelem::HTTP.new(read_timeout: @read_timeout, open_timeout: @open_timeout)
       end
 
       def parse_tool_calls(tool_calls)
@@ -138,28 +121,6 @@ module Elelem
             name: tool_call.dig("function", "name"),
             arguments: tool_call.dig("function", "arguments") || {}
           }
-        end
-      end
-
-      class HttpAdapter
-        def initialize(read_timeout:, open_timeout:)
-          @read_timeout = read_timeout
-          @open_timeout = open_timeout
-        end
-
-        def post(uri, body:, &)
-          request = Net::HTTP::Post.new(uri)
-          request["content-type"] = "application/json"
-          request.body = JSON.generate(body)
-
-          http = Net::HTTP.new(uri.host, uri.port)
-          http.use_ssl = uri.scheme == "https"
-          http.read_timeout = @read_timeout
-          http.open_timeout = @open_timeout
-
-          http.start do |conn|
-            conn.request(request, &)
-          end
         end
       end
     end
